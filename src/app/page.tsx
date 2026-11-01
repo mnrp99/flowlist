@@ -10,6 +10,7 @@ import { InsightsScreen } from "@/components/screens/InsightsScreen";
 import { ProfileScreen } from "@/components/screens/ProfileScreen";
 import { CompletePlanBottomSheet } from "@/components/modals/CompletePlanBottomSheet";
 import { AddDraftModal } from "@/components/modals/AddDraftModal";
+import { AddIncomeBottomSheet } from "@/components/modals/AddIncomeBottomSheet";
 
 function MainApp() {
   const { activeTab } = useApp();
@@ -33,6 +34,7 @@ function MainApp() {
       {/* Modals & Overlays */}
       <CompletePlanBottomSheet />
       <AddDraftModal />
+      <AddIncomeBottomSheet />
     </div>
   );
 }

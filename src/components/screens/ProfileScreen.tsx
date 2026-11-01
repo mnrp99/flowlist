@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useApp } from "@/context/AppContext";
 import { formatRupiah } from "@/utils/format";
+import { RupiahInput } from "@/components/ui/RupiahInput";
 import {
   User,
   Shield,
@@ -11,29 +12,27 @@ import {
   Wallet,
   Sparkles,
   CheckCircle,
-  HeartHandshake,
 } from "lucide-react";
 
 export const ProfileScreen: React.FC = () => {
   const { realBalance, updateRealBalance, resetData, drafts, transactions } = useApp();
-  const [balanceInput, setBalanceInput] = useState(String(realBalance));
+  const [balanceInput, setBalanceInput] = useState<number>(realBalance);
   const [isSavedNotice, setIsSavedNotice] = useState(false);
 
   const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-    const val = Number(balanceInput.replace(/[^0-9]/g, ""));
-    if (!isNaN(val) && val >= 0) {
-      updateRealBalance(val);
+    if (balanceInput >= 0) {
+      updateRealBalance(balanceInput);
       setIsSavedNotice(true);
       setTimeout(() => setIsSavedNotice(false), 2000);
     }
   };
 
   const handleReset = () => {
-    if (confirm("Reset all dummy data back to default values?")) {
+    if (confirm("Reset seluruh data lokal ke nilai awal default?")) {
       resetData();
-      setBalanceInput("2000000");
-      alert("Data has been reset to defaults!");
+      setBalanceInput(2000000);
+      alert("Data berhasil direset ke kondisi awal!");
     }
   };
 
@@ -64,30 +63,27 @@ export const ProfileScreen: React.FC = () => {
         </div>
       </section>
 
-      {/* 2. Simulation & Balance Controls */}
+      {/* 2. Simulation & Balance Controls dengan RupiahInput */}
       <section className="p-4 rounded-3xl bg-white border border-slate-100 shadow-sm space-y-3">
         <div className="flex items-center gap-2">
           <Wallet className="w-5 h-5 text-emerald-600" />
           <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-            Simulate Real Balance
+            Simulasi Saldo Kas (Real Balance)
           </h3>
         </div>
-        <p className="text-xs text-slate-500">
-          Update your active cash in bank to test how Safe-to-Spend behaves when higher or lower than locked drafts.
+        <p className="text-xs text-slate-500 leading-relaxed">
+          Ubah saldo kas aktif untuk menguji dinamika Safe-to-Spend (saldo aman setelah dikurangi alokasi draft).
         </p>
 
         <form onSubmit={handleUpdate} className="space-y-2">
           <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <span className="absolute left-3 top-2.5 text-xs font-bold text-slate-400">
-                Rp
-              </span>
-              <input
-                type="text"
+            <div className="relative flex-1 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+              <RupiahInput
                 value={balanceInput}
-                onChange={(e) => setBalanceInput(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 tabular-nums"
-                placeholder="2000000"
+                onChange={setBalanceInput}
+                size="md"
+                placeholder="0"
+                required
               />
             </div>
             <button
@@ -100,7 +96,7 @@ export const ProfileScreen: React.FC = () => {
           {isSavedNotice && (
             <p className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
               <CheckCircle className="w-3.5 h-3.5" />
-              Balance updated successfully!
+              Saldo berhasil diperbarui!
             </p>
           )}
         </form>
@@ -111,24 +107,24 @@ export const ProfileScreen: React.FC = () => {
         <div className="flex items-center gap-2">
           <Shield className="w-5 h-5 text-indigo-600" />
           <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-            Tahap 1 Prototype Status
+            Status Prototipe Tahap 1
           </h3>
         </div>
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
             <span className="text-[10px] text-slate-400 uppercase font-bold">
-              Active Drafts
+              Drafts Aktif
             </span>
             <p className="text-base font-extrabold text-slate-800 mt-0.5">
-              {drafts.length} Items
+              {drafts.length} Item
             </p>
           </div>
           <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
             <span className="text-[10px] text-slate-400 uppercase font-bold">
-              Transactions
+              Riwayat Transaksi
             </span>
             <p className="text-base font-extrabold text-slate-800 mt-0.5">
-              {transactions.length} Records
+              {transactions.length} Data
             </p>
           </div>
         </div>
@@ -141,8 +137,8 @@ export const ProfileScreen: React.FC = () => {
             <RotateCcw className="w-4 h-4" />
           </div>
           <div>
-            <h4 className="text-xs font-bold text-slate-900">Reset Local Dummy Data</h4>
-            <p className="text-[11px] text-slate-500">Restore default demo dataset</p>
+            <h4 className="text-xs font-bold text-slate-900">Reset Data Dummy Lokal</h4>
+            <p className="text-[11px] text-slate-500">Kembalikan ke data awal demo</p>
           </div>
         </div>
         <button
@@ -161,10 +157,9 @@ export const ProfileScreen: React.FC = () => {
           <strong className="text-slate-900 font-bold block mb-0.5">
             Progressive Web App (PWA) Ready
           </strong>
-          You can add WorthIt Flow to your home screen on iOS / Android via &quot;Add to Home Screen&quot; for a full native app experience.
+          Anda dapat menambahkan WorthIt Flow ke layar utama smartphone (Add to Home Screen) di iOS / Android.
         </div>
       </section>
     </div>
   );
 };
-

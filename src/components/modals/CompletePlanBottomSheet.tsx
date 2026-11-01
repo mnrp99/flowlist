@@ -4,13 +4,13 @@ import React, { useState, useEffect } from "react";
 import { useApp } from "@/context/AppContext";
 import { WorthItRating } from "@/types";
 import { formatRupiah } from "@/utils/format";
+import { RupiahInput } from "@/components/ui/RupiahInput";
 import {
   X,
   Sparkles,
   CheckCircle2,
   ScanLine,
   Check,
-  AlertCircle,
   Receipt,
   RotateCcw,
 } from "lucide-react";
@@ -25,7 +25,7 @@ export const CompletePlanBottomSheet: React.FC = () => {
     lockedInDrafts,
   } = useApp();
 
-  const [actualAmount, setActualAmount] = useState<string>("");
+  const [actualAmount, setActualAmount] = useState<number>(0);
   const [selectedRating, setSelectedRating] = useState<WorthItRating>("worth-it");
   const [reflection, setReflection] = useState<string>("");
   const [customTitle, setCustomTitle] = useState<string>("");
@@ -37,12 +37,11 @@ export const CompletePlanBottomSheet: React.FC = () => {
   useEffect(() => {
     if (isScanModalOpen) {
       if (selectedDraftForDone) {
-        // Default actual amount to slightly different or equal to estimated
-        setActualAmount(String(selectedDraftForDone.estimatedCost || 325000));
+        setActualAmount(selectedDraftForDone.estimatedCost || 325000);
         setCustomTitle(selectedDraftForDone.title);
       } else {
-        setActualAmount("150000");
-        setCustomTitle("Receipt Expense");
+        setActualAmount(150000);
+        setCustomTitle("Nota Pembayaran");
       }
       setSelectedRating("worth-it");
       setReflection("");
@@ -53,14 +52,9 @@ export const CompletePlanBottomSheet: React.FC = () => {
 
   if (!isScanModalOpen) return null;
 
-  const numericAmount = Number(actualAmount.replace(/[^0-9]/g, "")) || 0;
-  // Impact on real balance and safe-to-spend
   const draftEst = selectedDraftForDone ? selectedDraftForDone.estimatedCost : 0;
-  // If moving from draft: new locked = lockedInDrafts - draftEst
-  // new real = realBalance - numericAmount
-  // new safe = (realBalance - numericAmount) - (lockedInDrafts - draftEst)
   const adjustedSafeToSpend =
-    realBalance - numericAmount - (lockedInDrafts - draftEst);
+    realBalance - actualAmount - (lockedInDrafts - draftEst);
 
   // Simulate AI OCR scan
   const handleSimulateScan = () => {
@@ -68,12 +62,11 @@ export const CompletePlanBottomSheet: React.FC = () => {
     setTimeout(() => {
       setIsScanning(false);
       setHasScanned(true);
-      // Auto fill realistic receipt amount
       if (selectedDraftForDone) {
         const simulatedBill = selectedDraftForDone.estimatedCost + 25000;
-        setActualAmount(String(simulatedBill));
+        setActualAmount(simulatedBill);
       } else {
-        setActualAmount("325000");
+        setActualAmount(325000);
         setCustomTitle("Izakaya Ramen Blok M - Bill #8492");
       }
       setScanConfidence(99.4);
@@ -81,10 +74,10 @@ export const CompletePlanBottomSheet: React.FC = () => {
   };
 
   const handleSave = () => {
-    if (numericAmount <= 0) return;
+    if (actualAmount <= 0) return;
     completeDraft(
       selectedDraftForDone ? selectedDraftForDone.id : null,
-      numericAmount,
+      actualAmount,
       selectedRating,
       reflection,
       customTitle,
@@ -94,7 +87,7 @@ export const CompletePlanBottomSheet: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
-      {/* Dimmed & Blurred Background Overlay */}
+      {/* Dimmed Overlay */}
       <div
         className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
         onClick={closeScanModal}
@@ -117,13 +110,13 @@ export const CompletePlanBottomSheet: React.FC = () => {
             <h2 className="text-base font-extrabold text-slate-900 tracking-tight leading-tight">
               {selectedDraftForDone
                 ? `Complete Plan: ${selectedDraftForDone.title}`
-                : "Scan & Log New Expense"}
+                : "Scan & Log Transaksi Baru"}
             </h2>
             <p className="text-xs font-medium text-slate-500 mt-0.5 flex items-center gap-1.5">
               {selectedDraftForDone ? (
                 <>
                   <span>
-                    Estimated:{" "}
+                    Estimasi awal:{" "}
                     <strong className="text-slate-800 font-bold tabular-nums">
                       {formatRupiah(selectedDraftForDone.estimatedCost)}
                     </strong>
@@ -134,7 +127,7 @@ export const CompletePlanBottomSheet: React.FC = () => {
                   </span>
                 </>
               ) : (
-                <span>Scan bill receipt to deduct directly from balance</span>
+                <span>Scan struk pembayaran untuk langsung memotong saldo kas</span>
               )}
             </p>
           </div>
@@ -156,19 +149,18 @@ export const CompletePlanBottomSheet: React.FC = () => {
             <div className="flex items-center justify-between mb-2.5">
               <span className="inline-flex items-center gap-1.5 bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-xs">
                 <Sparkles className="w-3.5 h-3.5" />
-                {hasScanned ? "✨ AI Extracted from Receipt" : "Smart Receipt OCR"}
+                {hasScanned ? "✨ AI Terbaca dari Struk" : "Smart Receipt OCR"}
               </span>
               <span className="text-[11px] text-slate-500 font-semibold">
-                {hasScanned ? `${scanConfidence}% confidence` : "Tap to simulate"}
+                {hasScanned ? `${scanConfidence}% confidence` : "Simulasi scan 1-klik"}
               </span>
             </div>
 
-            {/* Receipt Scan Preview or Trigger */}
             {isScanning ? (
               <div className="flex flex-col items-center justify-center py-5 gap-2">
                 <div className="w-10 h-10 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin" />
                 <span className="text-xs font-bold text-emerald-800 animate-pulse">
-                  Analyzing receipt image with OCR...
+                  Menganalisis foto struk dengan AI OCR...
                 </span>
               </div>
             ) : hasScanned ? (
@@ -180,7 +172,7 @@ export const CompletePlanBottomSheet: React.FC = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-bold text-slate-900 truncate">
-                      {customTitle || "Scanned Merchant Bill"}
+                      {customTitle || "Struk Pembayaran Merchant"}
                     </h4>
                     <button
                       type="button"
@@ -192,11 +184,11 @@ export const CompletePlanBottomSheet: React.FC = () => {
                     </button>
                   </div>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    Items detected • Tax & Service Included
+                    Item terdeteksi • Pajak & Layanan Otomatis
                   </p>
                   <div className="mt-1 flex items-center gap-1.5 text-[10px] text-emerald-700 font-semibold">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    Amount verified automatically
+                    Nominal terisi otomatis ({formatRupiah(actualAmount)})
                   </div>
                 </div>
               </div>
@@ -207,40 +199,35 @@ export const CompletePlanBottomSheet: React.FC = () => {
                 className="w-full py-3.5 px-4 rounded-xl bg-white border border-emerald-300 text-emerald-800 font-bold text-xs flex items-center justify-center gap-2 hover:bg-emerald-50 active:scale-[0.98] transition-all shadow-xs group"
               >
                 <ScanLine className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
-                <span>Simulate 1-Click Scan Receipt (Auto-Fill)</span>
+                <span>Simulasi 1-Klik Scan Nota (Otomatis Isi Harga)</span>
               </button>
             )}
           </div>
 
-          {/* 2. ACTUAL AMOUNT INPUT */}
+          {/* 2. ACTUAL AMOUNT INPUT DENGAN FORMAT TITIK OTOMATIS */}
           <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-3.5 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-100 transition-all">
             <div className="flex justify-between items-center mb-1">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Actual Amount Spent
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                Nominal Asli Pengeluaran (Struk)
               </label>
-              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-                Editable
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                Format Otomatis (50.000)
               </span>
             </div>
 
-            <div className="relative flex items-baseline">
-              <span className="text-2xl font-bold text-slate-400 mr-1.5 select-none">
-                Rp
-              </span>
-              <input
-                type="text"
-                value={actualAmount}
-                onChange={(e) => setActualAmount(e.target.value.replace(/[^0-9]/g, ""))}
-                className="w-full text-2xl font-extrabold text-slate-900 tracking-tight bg-transparent focus:outline-none tabular-nums"
-                placeholder="0"
-              />
-            </div>
+            <RupiahInput
+              value={actualAmount}
+              onChange={setActualAmount}
+              size="hero"
+              placeholder="0"
+              required
+            />
 
             {/* Deduction impact preview */}
             <div className="mt-2 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
-              <span className="text-slate-500">Deduction impact:</span>
+              <span className="text-slate-500">Dampak pemotongan saldo:</span>
               <span className="font-bold text-slate-700">
-                Safe-to-Spend will adjust to{" "}
+                Safe-to-Spend akan menjadi{" "}
                 <span
                   className={
                     adjustedSafeToSpend < 0 ? "text-rose-600 font-extrabold" : "text-emerald-600"
@@ -256,15 +243,15 @@ export const CompletePlanBottomSheet: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                <span>Was it worth your money?</span>
+                <span>Apakah sebanding dengan uang Anda?</span>
                 <span className="text-rose-500 font-bold">*</span>
               </label>
               <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                Mandatory Metric
+                Wajib Dinilai
               </span>
             </div>
 
-            {/* 3 Selectable Cards Side-by-Side */}
+            {/* 3 Pilihan Kartu Rating */}
             <div className="grid grid-cols-3 gap-2">
               {/* Option 1: Again! */}
               <button
@@ -288,7 +275,7 @@ export const CompletePlanBottomSheet: React.FC = () => {
                   Again!
                 </div>
                 <div className="text-[10px] font-medium text-emerald-700 mt-1 leading-tight">
-                  Loved it / Def coming back
+                  Puas banget / Pasti balik lagi
                 </div>
               </button>
 
@@ -314,7 +301,7 @@ export const CompletePlanBottomSheet: React.FC = () => {
                   Sometimes
                 </div>
                 <div className="text-[10px] font-medium text-amber-700 mt-1 leading-tight">
-                  Okay, occasionally
+                  Lumayan, sesekali aja
                 </div>
               </button>
 
@@ -340,32 +327,31 @@ export const CompletePlanBottomSheet: React.FC = () => {
                   Never Again
                 </div>
                 <div className="text-[10px] font-medium text-rose-700 mt-1 leading-tight">
-                  Waste of money / Regret
+                  Buang uang / Menyesal
                 </div>
               </button>
             </div>
 
-            {/* Micro Explainer */}
             <p className="text-[11px] text-slate-400 font-medium text-center mt-2">
-              This rating trains your{" "}
+              Penilaian ini melatih{" "}
               <strong className="text-slate-700 font-semibold">
                 Mindful Flow Score (82%)
               </strong>{" "}
-              and future draft insights.
+              dan tab Insights favorit vs blacklist Anda.
             </p>
           </div>
 
           {/* 4. OPTIONAL REFLECTION NOTE */}
           <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
             <label className="text-[11px] font-bold text-slate-700 block mb-1">
-              Reflective Note (Optional)
+              Catatan Refleksi Pengeluaran (Opsional)
             </label>
             <input
               type="text"
               value={reflection}
               onChange={(e) => setReflection(e.target.value)}
-              placeholder="e.g. Rich broth, super worth it with friends!"
-              className="w-full text-xs p-2 bg-white rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              placeholder="Contoh: Kuah tonkotsu mantap, worth it bawa teman!"
+              className="w-full text-xs p-2.5 bg-white rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
           </div>
         </div>
@@ -375,7 +361,7 @@ export const CompletePlanBottomSheet: React.FC = () => {
           <button
             type="button"
             onClick={handleSave}
-            disabled={numericAmount <= 0}
+            disabled={actualAmount <= 0}
             className="w-full py-4 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 active:scale-[0.99] text-white font-extrabold text-sm tracking-wide shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition-all"
           >
             <CheckCircle2 className="w-5 h-5 text-emerald-100" />
@@ -387,11 +373,10 @@ export const CompletePlanBottomSheet: React.FC = () => {
             onClick={closeScanModal}
             className="w-full py-2 text-center text-xs font-bold text-slate-400 hover:text-slate-700 transition-colors"
           >
-            Keep in Drafts for Later
+            Simpan di Drafts Dulu (Nanti Saja)
           </button>
         </div>
       </div>
     </div>
   );
 };
-

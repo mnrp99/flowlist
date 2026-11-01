@@ -25,8 +25,12 @@ interface AppContextType {
   isAddDraftModalOpen: boolean;
   openAddDraftModal: () => void;
   closeAddDraftModal: () => void;
+  isAddIncomeModalOpen: boolean;
+  openAddIncomeModal: () => void;
+  closeAddIncomeModal: () => void;
   addDraft: (draft: Omit<DraftItem, "id">) => void;
   deleteDraft: (id: string) => void;
+  toggleTodoCompleted: (id: string) => void;
   completeDraft: (
     draftId: string | null,
     actualAmount: number,
@@ -34,6 +38,12 @@ interface AppContextType {
     reflection?: string,
     customTitle?: string,
     customCategory?: string
+  ) => void;
+  addIncome: (
+    amount: number,
+    source: string,
+    title?: string,
+    dateStr?: string
   ) => void;
   updateRealBalance: (newBalance: number) => void;
   resetData: () => void;
@@ -43,8 +53,8 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
   BALANCE: "worthit_real_balance",
-  DRAFTS: "worthit_drafts",
-  TRANSACTIONS: "worthit_transactions",
+  DRAFTS: "worthit_drafts_v2",
+  TRANSACTIONS: "worthit_transactions_v2",
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -63,6 +73,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   const [selectedDraftForDone, setSelectedDraftForDone] =
     useState<DraftItem | null>(null);
   const [isAddDraftModalOpen, setIsAddDraftModalOpen] =
+    useState<boolean>(false);
+  const [isAddIncomeModalOpen, setIsAddIncomeModalOpen] =
     useState<boolean>(false);
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
 
@@ -104,11 +116,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [realBalance, drafts, transactions, isHydrated]);
 
-  // Derived state calculations
-  const lockedInDrafts = drafts.reduce(
-    (sum, item) => sum + (item.estimatedCost || 0),
-    0
-  );
+  // Derived calculations: To-Do items do not lock money (estimatedCost is 0)
+  const lockedInDrafts = drafts.reduce((sum, item) => {
+    if (item.category === "to-do") return sum;
+    return sum + (item.estimatedCost || 0);
+  }, 0);
+
   const safeToSpend = realBalance - lockedInDrafts;
 
   const toggleBalanceVisibility = () => {
@@ -133,16 +146,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsAddDraftModalOpen(false);
   };
 
+  const openAddIncomeModal = () => {
+    setIsAddIncomeModalOpen(true);
+  };
+
+  const closeAddIncomeModal = () => {
+    setIsAddIncomeModalOpen(false);
+  };
+
   const addDraft = (draft: Omit<DraftItem, "id">) => {
     const newItem: DraftItem = {
       ...draft,
       id: `draft-${Date.now()}`,
+      // Ensure to-do has 0 estimatedCost
+      estimatedCost: draft.category === "to-do" ? 0 : draft.estimatedCost,
+      completed: false,
     };
     setDrafts((prev) => [newItem, ...prev]);
   };
 
   const deleteDraft = (id: string) => {
     setDrafts((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  // Toggle To-Do activity completion directly in local state (no modal, no expense logged)
+  const toggleTodoCompleted = (id: string) => {
+    setDrafts((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, completed: !item.completed } : item
+      )
+    );
   };
 
   const completeDraft = (
@@ -162,7 +195,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       if (existing) {
         itemTitle = existing.title;
         itemCategory = existing.subtag || existing.category;
-        iconType = existing.category === "to-go" ? "ramen" : existing.category === "to-buy" ? "shopping" : "palette";
+        iconType =
+          existing.category === "to-go"
+            ? "ramen"
+            : existing.category === "to-buy"
+            ? "shopping"
+            : "palette";
         // Remove from drafts
         setDrafts((prev) => prev.filter((d) => d.id !== draftId));
       }
@@ -178,14 +216,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       type: "expense",
       amount: actualAmount,
       category: itemCategory,
-      time: "Just now",
+      time: "Hari ini, Baru saja",
       rating,
       iconType,
-      reflection: reflection || (rating === "worth-it" ? "Worth every rupiah!" : rating === "so-so" ? "Okay experience." : "Waste of money / Regret."),
+      reflection:
+        reflection ||
+        (rating === "worth-it"
+          ? "Worth every rupiah!"
+          : rating === "so-so"
+          ? "Pengalaman cukup lumayan."
+          : "Waste of money / Menyesal."),
     };
 
     setTransactions((prev) => [newTx, ...prev]);
     closeScanModal();
+  };
+
+  // Add Income (Top-up balance)
+  const addIncome = (
+    amount: number,
+    source: string,
+    title?: string,
+    dateStr?: string
+  ) => {
+    // Increase real balance
+    setRealBalance((prev) => prev + amount);
+
+    // Create income transaction
+    const newTx: Transaction = {
+      id: `tx-${Date.now()}`,
+      title: title || `${source} Payout`,
+      type: "income",
+      amount,
+      category: "INCOME",
+      source,
+      time: dateStr || "Hari ini, Baru saja",
+      rating: null,
+      iconType: "wallet",
+    };
+
+    setTransactions((prev) => [newTx, ...prev]);
+    closeAddIncomeModal();
   };
 
   const updateRealBalance = (newBalance: number) => {
@@ -220,9 +291,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         isAddDraftModalOpen,
         openAddDraftModal,
         closeAddDraftModal,
+        isAddIncomeModalOpen,
+        openAddIncomeModal,
+        closeAddIncomeModal,
         addDraft,
         deleteDraft,
+        toggleTodoCompleted,
         completeDraft,
+        addIncome,
         updateRealBalance,
         resetData,
       }}
@@ -239,4 +315,3 @@ export const useApp = () => {
   }
   return context;
 };
-
