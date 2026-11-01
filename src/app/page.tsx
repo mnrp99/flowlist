@@ -10,16 +10,15 @@ import { InsightsScreen } from "@/components/screens/InsightsScreen";
 import { ProfileScreen } from "@/components/screens/ProfileScreen";
 import { CompletePlanBottomSheet } from "@/components/modals/CompletePlanBottomSheet";
 import { AddDraftModal } from "@/components/modals/AddDraftModal";
+import { AddIncomeBottomSheet } from "@/components/modals/AddIncomeBottomSheet";
 
 function MainApp() {
   const { activeTab } = useApp();
 
   return (
     <div className="relative mx-auto min-h-screen w-full max-w-[430px] flex flex-col bg-[#faf8ff] shadow-2xl overflow-x-hidden">
-      {/* Top Fixed Header */}
       <Header />
 
-      {/* Main Screen Content Viewport */}
       <main className="flex-1 w-full pt-20 px-4">
         {activeTab === "dashboard" && <DashboardScreen />}
         {activeTab === "drafts" && <DraftsScreen />}
@@ -27,12 +26,11 @@ function MainApp() {
         {activeTab === "profile" && <ProfileScreen />}
       </main>
 
-      {/* Floating Bottom Nav */}
       <BottomNav />
 
-      {/* Modals & Overlays */}
       <CompletePlanBottomSheet />
       <AddDraftModal />
+      <AddIncomeBottomSheet />
     </div>
   );
 }
