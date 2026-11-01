@@ -1,14 +1,37 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { DraftItem, Transaction, WorthItRating } from "@/types";
 import {
-  INITIAL_REAL_BALANCE,
-  INITIAL_DRAFTS,
-  INITIAL_TRANSACTIONS,
-} from "@/data/initialData";
+  getAppData,
+  addIncome as addIncomeAction,
+  addExpenseDirect as addExpenseDirectAction,
+  createPlan as createPlanAction,
+  completeTodoPlan as completeTodoPlanAction,
+  completePaidPlan as completePaidPlanAction,
+  deletePlan as deletePlanAction,
+  deleteTransaction as deleteTransactionAction,
+  updateWalletBalance as updateWalletBalanceAction,
+} from "@/actions/worthit";
+
+export interface CurrentUser {
+  id: string;
+  email: string;
+}
 
 interface AppContextType {
+  currentUser: CurrentUser | null;
+  isLoading: boolean;
+  isSyncing: boolean;
+  refreshData: () => Promise<void>;
   realBalance: number;
   drafts: DraftItem[];
   transactions: Transaction[];
@@ -28,9 +51,9 @@ interface AppContextType {
   isAddIncomeModalOpen: boolean;
   openAddIncomeModal: () => void;
   closeAddIncomeModal: () => void;
-  addDraft: (draft: Omit<DraftItem, "id">) => void;
-  deleteDraft: (id: string) => void;
-  toggleTodoCompleted: (id: string) => void;
+  addDraft: (draft: Omit<DraftItem, "id">) => Promise<void>;
+  deleteDraft: (id: string) => Promise<void>;
+  toggleTodoCompleted: (id: string) => Promise<void>;
   completeDraft: (
     draftId: string | null,
     actualAmount: number,
@@ -38,33 +61,35 @@ interface AppContextType {
     reflection?: string,
     customTitle?: string,
     customCategory?: string
-  ) => void;
+  ) => Promise<void>;
   addIncome: (
     amount: number,
     source: string,
     title?: string,
     dateStr?: string
-  ) => void;
-  updateRealBalance: (newBalance: number) => void;
+  ) => Promise<void>;
+  deleteTransaction: (id: string) => Promise<void>;
+  updateRealBalance: (newBalance: number) => Promise<void>;
+  logout: () => Promise<void>;
   resetData: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const STORAGE_KEYS = {
-  BALANCE: "worthit_real_balance",
-  DRAFTS: "worthit_drafts_v2",
-  TRANSACTIONS: "worthit_transactions_v2",
-};
-
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [realBalance, setRealBalance] = useState<number>(INITIAL_REAL_BALANCE);
-  const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
-  const [transactions, setTransactions] = useState<Transaction[]>(
-    INITIAL_TRANSACTIONS
-  );
+  const router = useRouter();
+  const supabase = createClient();
+
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+
+  const [realBalance, setRealBalance] = useState<number>(0);
+  const [drafts, setDrafts] = useState<DraftItem[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
   const [activeTab, setActiveTab] = useState<
     "dashboard" | "drafts" | "insights" | "profile"
   >("dashboard");
@@ -76,49 +101,56 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     useState<boolean>(false);
   const [isAddIncomeModalOpen, setIsAddIncomeModalOpen] =
     useState<boolean>(false);
-  const [isHydrated, setIsHydrated] = useState<boolean>(false);
 
-  // Load from localStorage on client mount
-  useEffect(() => {
+  // Fetch initial data from server action
+  const loadData = useCallback(async () => {
     try {
-      const savedBalance = localStorage.getItem(STORAGE_KEYS.BALANCE);
-      const savedDrafts = localStorage.getItem(STORAGE_KEYS.DRAFTS);
-      const savedTx = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS);
+      setIsSyncing(true);
+      const res = await getAppData();
+      if (res.error || !res.data) {
+        // Not authenticated -> redirect to /login
+        router.push("/login");
+        return;
+      }
 
-      if (savedBalance !== null) {
-        setRealBalance(Number(savedBalance));
-      }
-      if (savedDrafts !== null) {
-        setDrafts(JSON.parse(savedDrafts));
-      }
-      if (savedTx !== null) {
-        setTransactions(JSON.parse(savedTx));
-      }
-    } catch (e) {
-      console.error("Failed to load state from localStorage:", e);
+      setCurrentUser(res.data.user);
+      setRealBalance(res.data.wallet.realBalance);
+      setDrafts(res.data.drafts);
+      setTransactions(res.data.transactions);
+    } catch (err) {
+      console.error("Failed to load app data from server:", err);
     } finally {
-      setIsHydrated(true);
+      setIsLoading(false);
+      setIsSyncing(false);
     }
-  }, []);
+  }, [router]);
 
-  // Save changes to localStorage
+  // Initial load & Supabase Auth state listener
   useEffect(() => {
-    if (!isHydrated) return;
-    try {
-      localStorage.setItem(STORAGE_KEYS.BALANCE, String(realBalance));
-      localStorage.setItem(STORAGE_KEYS.DRAFTS, JSON.stringify(drafts));
-      localStorage.setItem(
-        STORAGE_KEYS.TRANSACTIONS,
-        JSON.stringify(transactions)
-      );
-    } catch (e) {
-      console.error("Failed to save state to localStorage:", e);
-    }
-  }, [realBalance, drafts, transactions, isHydrated]);
+    loadData();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "USER_UPDATED" || event === "TOKEN_REFRESHED") {
+        loadData();
+      } else if (event === "SIGNED_OUT") {
+        setCurrentUser(null);
+        setRealBalance(0);
+        setDrafts([]);
+        setTransactions([]);
+        router.push("/login");
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [loadData, supabase, router]);
 
   // Derived calculations: To-Do items do not lock money (estimatedCost is 0)
   const lockedInDrafts = drafts.reduce((sum, item) => {
-    if (item.category === "to-do") return sum;
+    if (item.category === "to-do" || item.completed) return sum;
     return sum + (item.estimatedCost || 0);
   }, 0);
 
@@ -154,31 +186,85 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsAddIncomeModalOpen(false);
   };
 
-  const addDraft = (draft: Omit<DraftItem, "id">) => {
-    const newItem: DraftItem = {
+  // Add draft (Server Action + Optimistic Update)
+  const addDraft = async (draft: Omit<DraftItem, "id">) => {
+    const tempId = `temp-${Date.now()}`;
+    const optimisticItem: DraftItem = {
       ...draft,
-      id: `draft-${Date.now()}`,
-      // Ensure to-do has 0 estimatedCost
+      id: tempId,
       estimatedCost: draft.category === "to-do" ? 0 : draft.estimatedCost,
       completed: false,
     };
-    setDrafts((prev) => [newItem, ...prev]);
+
+    setDrafts((prev) => [optimisticItem, ...prev]);
+
+    try {
+      setIsSyncing(true);
+      await createPlanAction({
+        title: draft.title,
+        category: draft.category,
+        subCategory: draft.subtag,
+        estimatedCost: draft.category === "to-do" ? 0 : draft.estimatedCost,
+        priority: draft.priority,
+        referenceUrl: draft.link,
+        imageUrl: draft.image,
+        notes: draft.notes,
+        targetDate: draft.date,
+      });
+      await loadData();
+    } catch (e) {
+      console.error("Failed to create plan:", e);
+      // rollback
+      setDrafts((prev) => prev.filter((d) => d.id !== tempId));
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
-  const deleteDraft = (id: string) => {
+  // Delete draft (Server Action + Optimistic Update)
+  const deleteDraft = async (id: string) => {
+    const target = drafts.find((d) => d.id === id);
     setDrafts((prev) => prev.filter((item) => item.id !== id));
+
+    try {
+      setIsSyncing(true);
+      await deletePlanAction(id);
+    } catch (e) {
+      console.error("Failed to delete plan:", e);
+      if (target) {
+        setDrafts((prev) => [target, ...prev]);
+      }
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
-  // Toggle To-Do activity completion directly in local state (no modal, no expense logged)
-  const toggleTodoCompleted = (id: string) => {
+  // Toggle To-Do activity completion (1-click checkbox)
+  const toggleTodoCompleted = async (id: string) => {
     setDrafts((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, completed: !item.completed } : item
       )
     );
+
+    try {
+      setIsSyncing(true);
+      await completeTodoPlanAction(id);
+    } catch (e) {
+      console.error("Failed to toggle todo completion:", e);
+      // Revert on failure
+      setDrafts((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, completed: !item.completed } : item
+        )
+      );
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
-  const completeDraft = (
+  // Complete Paid Plan / Direct Expense
+  const completeDraft = async (
     draftId: string | null,
     actualAmount: number,
     rating: WorthItRating,
@@ -188,29 +274,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   ) => {
     let itemTitle = customTitle || "Expense Scan";
     let itemCategory = customCategory || "General Spend";
-    let iconType = "receipt";
 
     if (draftId) {
       const existing = drafts.find((d) => d.id === draftId);
       if (existing) {
         itemTitle = existing.title;
         itemCategory = existing.subtag || existing.category;
-        iconType =
-          existing.category === "to-go"
-            ? "ramen"
-            : existing.category === "to-buy"
-            ? "shopping"
-            : "palette";
-        // Remove from drafts
-        setDrafts((prev) => prev.filter((d) => d.id !== draftId));
       }
+      // Optimistically remove from drafts
+      setDrafts((prev) => prev.filter((d) => d.id !== draftId));
     }
 
-    // Deduct real balance
+    // Optimistically deduct real balance
     setRealBalance((prev) => prev - actualAmount);
 
-    // Create new transaction
-    const newTx: Transaction = {
+    // Optimistically prepend transaction
+    const optimisticTx: Transaction = {
       id: `tx-${Date.now()}`,
       title: itemTitle,
       type: "expense",
@@ -218,7 +297,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       category: itemCategory,
       time: "Hari ini, Baru saja",
       rating,
-      iconType,
+      iconType: "receipt",
       reflection:
         reflection ||
         (rating === "worth-it"
@@ -227,25 +306,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
           ? "Pengalaman cukup lumayan."
           : "Waste of money / Menyesal."),
     };
-
-    setTransactions((prev) => [newTx, ...prev]);
+    setTransactions((prev) => [optimisticTx, ...prev]);
     closeScanModal();
+
+    try {
+      setIsSyncing(true);
+      if (draftId) {
+        await completePaidPlanAction(draftId, actualAmount, rating);
+      } else {
+        await addExpenseDirectAction(
+          itemTitle,
+          actualAmount,
+          itemCategory,
+          rating
+        );
+      }
+      await loadData();
+    } catch (e) {
+      console.error("Failed to complete expense:", e);
+      await loadData();
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   // Add Income (Top-up balance)
-  const addIncome = (
+  const addIncome = async (
     amount: number,
     source: string,
     title?: string,
     dateStr?: string
   ) => {
-    // Increase real balance
+    const finalTitle = title || `${source} Payout`;
+
+    // Optimistic balance update
     setRealBalance((prev) => prev + amount);
 
-    // Create income transaction
-    const newTx: Transaction = {
+    // Optimistic transaction
+    const optimisticTx: Transaction = {
       id: `tx-${Date.now()}`,
-      title: title || `${source} Payout`,
+      title: finalTitle,
       type: "income",
       amount,
       category: "INCOME",
@@ -254,27 +354,83 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       rating: null,
       iconType: "wallet",
     };
-
-    setTransactions((prev) => [newTx, ...prev]);
+    setTransactions((prev) => [optimisticTx, ...prev]);
     closeAddIncomeModal();
+
+    try {
+      setIsSyncing(true);
+      await addIncomeAction(finalTitle, amount, source, dateStr);
+      await loadData();
+    } catch (e) {
+      console.error("Failed to add income:", e);
+      await loadData();
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
-  const updateRealBalance = (newBalance: number) => {
+  // Delete transaction (revert balance)
+  const deleteTransaction = async (id: string) => {
+    const tx = transactions.find((t) => t.id === id);
+    if (!tx) return;
+
+    // Optimistic balance reversal
+    if (tx.type === "expense") {
+      setRealBalance((prev) => prev + tx.amount);
+    } else {
+      setRealBalance((prev) => prev - tx.amount);
+    }
+    setTransactions((prev) => prev.filter((t) => t.id !== id));
+
+    try {
+      setIsSyncing(true);
+      await deleteTransactionAction(id);
+      await loadData();
+    } catch (e) {
+      console.error("Failed to delete transaction:", e);
+      await loadData();
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Update real balance (Simulator in Profile)
+  const updateRealBalance = async (newBalance: number) => {
     setRealBalance(newBalance);
+    try {
+      setIsSyncing(true);
+      await updateWalletBalanceAction(newBalance);
+      await loadData();
+    } catch (e) {
+      console.error("Failed to update wallet balance:", e);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Logout
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setCurrentUser(null);
+      router.push("/login");
+      router.refresh();
+    } catch (e) {
+      console.error("Failed to log out:", e);
+    }
   };
 
   const resetData = () => {
-    setRealBalance(INITIAL_REAL_BALANCE);
-    setDrafts(INITIAL_DRAFTS);
-    setTransactions(INITIAL_TRANSACTIONS);
-    localStorage.removeItem(STORAGE_KEYS.BALANCE);
-    localStorage.removeItem(STORAGE_KEYS.DRAFTS);
-    localStorage.removeItem(STORAGE_KEYS.TRANSACTIONS);
+    loadData();
   };
 
   return (
     <AppContext.Provider
       value={{
+        currentUser,
+        isLoading,
+        isSyncing,
+        refreshData: loadData,
         realBalance,
         drafts,
         transactions,
@@ -299,7 +455,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         toggleTodoCompleted,
         completeDraft,
         addIncome,
+        deleteTransaction,
         updateRealBalance,
+        logout,
         resetData,
       }}
     >
