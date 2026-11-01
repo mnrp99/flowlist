@@ -51,3 +51,4 @@ export function mapRatingFromPrisma(rating?: PrismaWorthItRating | null): WorthI
       return "regret";
   }
 }
+

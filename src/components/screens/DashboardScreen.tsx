@@ -218,8 +218,30 @@ export const DashboardScreen: React.FC = () => {
         </div>
       </section>
 
-      {/* 2. AUTOMATIC RED WARNING BANNER (When Safe-to-Spend < 0) */}
-      {safeToSpend < 0 ? (
+      {/* 2. CONTEXTUAL STATUS & WARNING BANNERS */}
+      {/* 2A. Fresh User / Empty Wallet Tip */}
+      {realBalance === 0 && lockedInDrafts === 0 && !isBannerDismissed && (
+        <aside className="relative flex items-center justify-between p-3.5 rounded-2xl bg-indigo-50/90 border border-indigo-200/80 text-indigo-950 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <PlusCircle className="w-4 h-4" />
+            </div>
+            <p className="text-xs text-indigo-900 font-medium">
+              Mulai catat keuanganmu dengan menambah pemasukan pertama.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={openAddIncomeModal}
+            className="px-2.5 py-1 text-xs font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shrink-0 cursor-pointer"
+          >
+            + Top Up
+          </button>
+        </aside>
+      )}
+
+      {/* 2B. AUTOMATIC RED WARNING BANNER (When Safe-to-Spend < 0) */}
+      {safeToSpend < 0 && (
         <aside className="relative flex items-start gap-3 p-3.5 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-950 shadow-md shadow-rose-500/10 animate-bounce duration-1000">
           <div className="w-8 h-8 rounded-full bg-rose-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
             <AlertTriangle className="w-4 h-4 text-white" />
@@ -253,16 +275,21 @@ export const DashboardScreen: React.FC = () => {
             </div>
           </div>
         </aside>
-      ) : (
-        /* Regular Caution / Contextual Mindful Banner (When Safe-to-Spend >= 0) */
-        !isBannerDismissed && (
+      )}
+
+      {/* 2C. Regular Caution Banner (HANYA muncul jika alokasi draft > 80% dari saldo kas riil) */}
+      {safeToSpend >= 0 &&
+        !isBannerDismissed &&
+        realBalance > 0 &&
+        lockedInDrafts > 0 &&
+        safeToSpend <= realBalance * 0.2 && (
           <aside className="relative flex items-start gap-3 p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200/80 text-amber-950 shadow-sm transition-all hover:bg-amber-50">
             <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
               <AlertTriangle className="w-4 h-4 text-white" />
             </div>
             <div className="flex-1 min-w-0 pr-1">
               <p className="text-xs text-amber-900 leading-snug">
-                Hati-hati! Pengeluaran harian mendekati cadangan tabungan wishlist Anda.
+                Perhatian: Alokasi draft rencana telah mengunci lebih dari 80% saldo kas Anda ({formatRupiah(lockedInDrafts)} dari {formatRupiah(realBalance)}).
               </p>
               <button
                 type="button"
@@ -282,8 +309,7 @@ export const DashboardScreen: React.FC = () => {
               <X className="w-4 h-4" />
             </button>
           </aside>
-        )
-      )}
+        )}
 
       {/* 3. QUICK ACTION SHORTCUT TILES */}
       <section aria-label="Quick Actions" className="grid grid-cols-4 gap-2.5">

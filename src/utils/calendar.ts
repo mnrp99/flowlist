@@ -20,3 +20,4 @@ export function createGoogleCalendarUrl(
 
   return `${base}&${params.toString()}`;
 }
+

@@ -18,6 +18,7 @@ import {
   mapRatingToPrisma,
   mapRatingFromPrisma,
 } from "@/utils/mappers";
+import { parseTransactionDate, parsePlanTargetDate } from "@/utils/date";
 
 export interface CreatePlanInput {
   title: string;
@@ -196,7 +197,7 @@ export async function addIncome(
     throw new Error("Nominal pemasukan harus lebih dari 0");
   }
 
-  const txDate = date ? new Date(date) : new Date();
+  const txDate = parseTransactionDate(date);
 
   await prisma.$transaction(async (tx) => {
     // 1. Create INCOME transaction
@@ -250,7 +251,7 @@ export async function addExpenseDirect(
     throw new Error("Nominal pengeluaran harus lebih dari 0");
   }
 
-  const txDate = date ? new Date(date) : new Date();
+  const txDate = parseTransactionDate(date);
   const prismaRating = mapRatingToPrisma(worthItRating);
 
   await prisma.$transaction(async (tx) => {
@@ -312,7 +313,7 @@ export async function createPlan(data: CreatePlanInput) {
       referenceUrl: data.referenceUrl || null,
       imageUrl: data.imageUrl || null,
       locationName: data.locationName || null,
-      targetDate: data.targetDate ? new Date(data.targetDate) : null,
+      targetDate: parsePlanTargetDate(data.targetDate),
       notes: data.notes || null,
       status: PlanStatus.DRAFT,
     },
