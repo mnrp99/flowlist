@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Wallet {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  realBalance Float    @default(0)
+  updatedAt   DateTime @updatedAt
+}
+
+model Plan {
+  id            String        @id @default(uuid())
+  userId        String
+  category      PlanCategory
+  subCategory   String        @default("General")
+  title         String
+  estimatedCost Float         @default(0)
+  paxCount      Int           @default(1)
+  priority      String?       // Khusus TO_DO: HIGH, MEDIUM, LOW
+  referenceUrl  String?
+  imageUrl      String?
+  locationName  String?
+  targetDate    DateTime?
+  notes         String?
+  status        PlanStatus    @default(DRAFT)
+  createdAt     DateTime      @default(now())
+  transactions  Transaction[]
+}
+
+model Transaction {
+  id              String          @id @default(uuid())
+  userId          String
+  planId          String?
+  plan            Plan?           @relation(fields: [planId], references: [id], onDelete: SetNull)
+  type            TransactionType
+  category        String
+  title           String
+  amount          Float
+  receiptImageUrl String?
+  worthItRating   WorthItRating?
+  transactionDate DateTime        @default(now())
+}
+
+enum PlanCategory {
+  TO_GO
+  TO_BUY
+  TO_DO
+}
+
+enum PlanStatus {
+  DRAFT
+  COMPLETED
+  CANCELED
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum WorthItRating {
+  AGAIN
+  SOMETIMES
+  NEVER
+}
