@@ -58,9 +58,12 @@ export async function getAppData() {
     });
   }
 
-  // 2. Fetch user's plans (ordered by creation date)
+  // 2. Fetch user's active draft plans (exclude completed plans)
   const dbPlans = await prisma.plan.findMany({
-    where: { userId: user.id },
+    where: {
+      userId: user.id,
+      status: { not: PlanStatus.COMPLETED },
+    },
     orderBy: { createdAt: "desc" },
   });
 

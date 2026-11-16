@@ -18,17 +18,17 @@ function MainApp() {
 
   if (isLoading) {
     return (
-      <div className="relative mx-auto min-h-screen w-full max-w-[430px] flex flex-col items-center justify-center bg-[#faf8ff] p-6 shadow-2xl">
+      <div className="relative mx-auto min-h-screen w-full max-w-[430px] flex flex-col items-center justify-center bg-[#faf8ff] dark:bg-[#070b14] p-6 shadow-2xl transition-colors duration-200">
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/25 animate-pulse">
             <Sparkles className="w-7 h-7" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-slate-900 tracking-tight">
-              WorthIt<span className="text-indigo-600">.Flow</span>
+            <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">
+              WorthIt<span className="text-indigo-600 dark:text-indigo-400">.Flow</span>
             </h2>
-            <p className="text-xs text-slate-500 mt-1 flex items-center justify-center gap-1.5">
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600" />
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center justify-center gap-1.5">
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600 dark:text-indigo-400" />
               <span>Menghubungkan ke Supabase & Prisma...</span>
             </p>
           </div>
@@ -38,7 +38,7 @@ function MainApp() {
   }
 
   return (
-    <div className="relative mx-auto min-h-screen w-full max-w-[430px] flex flex-col bg-[#faf8ff] shadow-2xl overflow-x-hidden">
+    <div className="relative mx-auto min-h-screen w-full max-w-[430px] flex flex-col bg-[#faf8ff] dark:bg-[#070b14] text-slate-900 dark:text-slate-100 shadow-2xl overflow-x-hidden border-x border-transparent dark:border-slate-800/80 transition-colors duration-200">
       {/* Top Fixed Header */}
       <Header />
 

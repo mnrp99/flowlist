@@ -128,27 +128,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf8ff] flex items-center justify-center p-4">
-      <div className="w-full max-w-[430px] bg-white rounded-3xl shadow-xl shadow-indigo-100/50 border border-slate-100 p-6 md:p-8 relative overflow-hidden">
+    <div className="min-h-screen bg-[#faf8ff] dark:bg-[#070b14] flex items-center justify-center p-4 transition-colors duration-200">
+      <div className="w-full max-w-[430px] bg-white dark:bg-slate-900 rounded-3xl shadow-xl dark:shadow-slate-950 border border-slate-100 dark:border-slate-800 p-6 md:p-8 relative overflow-hidden transition-colors">
         {/* Glow ambient background elements */}
-        <div className="absolute -top-20 -right-20 w-48 h-48 bg-gradient-to-br from-indigo-200/50 to-purple-200/30 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-gradient-to-tr from-violet-200/40 to-pink-200/30 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -top-20 -right-20 w-48 h-48 bg-gradient-to-br from-indigo-200/50 dark:from-indigo-900/30 to-purple-200/30 dark:to-purple-900/20 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-gradient-to-tr from-violet-200/40 dark:from-violet-900/30 to-pink-200/30 dark:to-pink-900/20 rounded-full blur-2xl pointer-events-none" />
 
         {/* Brand Header */}
         <div className="text-center relative z-10 mb-6">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-500 text-white shadow-lg shadow-indigo-500/25 mb-3">
             <Sparkles className="w-7 h-7" />
           </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            WorthIt<span className="text-indigo-600">.Flow</span>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            WorthIt<span className="text-indigo-600 dark:text-indigo-400">.Flow</span>
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Safe-to-Spend & Mindful Spending Tracker
           </p>
         </div>
 
         {/* Segmented Mode Selector: Login vs Register */}
-        <div className="relative z-10 flex bg-slate-100 p-1 rounded-2xl mb-6">
+        <div className="relative z-10 flex bg-slate-100 dark:bg-slate-800/80 p-1 rounded-2xl mb-6">
           <button
             type="button"
             onClick={() => {
@@ -156,10 +156,10 @@ export default function LoginPage() {
               setErrorMessage(null);
               setSuccessMessage(null);
             }}
-            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
+            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
               mode === "login"
-                ? "bg-white text-indigo-700 shadow-sm"
-                : "text-slate-500 hover:text-slate-800"
+                ? "bg-white dark:bg-slate-900 text-indigo-700 dark:text-indigo-300 shadow-sm"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
             }`}
           >
             Masuk (Login)
@@ -171,10 +171,10 @@ export default function LoginPage() {
               setErrorMessage(null);
               setSuccessMessage(null);
             }}
-            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
+            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
               mode === "register"
-                ? "bg-white text-indigo-700 shadow-sm"
-                : "text-slate-500 hover:text-slate-800"
+                ? "bg-white dark:bg-slate-900 text-indigo-700 dark:text-indigo-300 shadow-sm"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
             }`}
           >
             Daftar Akun Baru
@@ -183,15 +183,15 @@ export default function LoginPage() {
 
         {/* Feedback Alerts */}
         {errorMessage && (
-          <div className="mb-4 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5 animate-fadeIn">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+          <div className="mb-4 p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/70 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2.5 animate-fadeIn">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="mb-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-start gap-2.5 animate-fadeIn">
-            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
+          <div className="mb-4 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs flex items-start gap-2.5 animate-fadeIn">
+            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
             <span>{successMessage}</span>
           </div>
         )}
@@ -199,7 +199,7 @@ export default function LoginPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
               Email
             </label>
             <div className="relative">
@@ -210,13 +210,13 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="nama@email.com"
-                className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50/80 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-slate-900 placeholder:text-slate-400"
+                className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50/80 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white placeholder:text-slate-400"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
               Kata Sandi
             </label>
             <div className="relative">
@@ -227,12 +227,12 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Minimal 6 karakter"
-                className="w-full pl-10 pr-11 py-2.5 text-sm bg-slate-50/80 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-slate-900 placeholder:text-slate-400"
+                className="w-full pl-10 pr-11 py-2.5 text-sm bg-slate-50/80 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white placeholder:text-slate-400"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer"
               >
                 {showPassword ? (
                   <EyeOff className="w-4 h-4" />
@@ -267,9 +267,9 @@ export default function LoginPage() {
         {/* Divider */}
         <div className="relative my-5 text-center">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200" />
+            <div className="w-full border-t border-slate-200 dark:border-slate-800" />
           </div>
-          <span className="relative bg-white px-3 text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+          <span className="relative bg-white dark:bg-slate-900 px-3 text-[11px] font-medium text-slate-400 uppercase tracking-wider">
             atau
           </span>
         </div>
@@ -279,10 +279,10 @@ export default function LoginPage() {
           type="button"
           onClick={handleGoogleLogin}
           disabled={googleLoading}
-          className="w-full py-2.5 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs shadow-sm flex items-center justify-center gap-3 transition active:scale-[0.99] disabled:opacity-60 cursor-pointer"
+          className="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 font-semibold text-xs shadow-sm flex items-center justify-center gap-3 transition active:scale-[0.99] disabled:opacity-60 cursor-pointer"
         >
           {googleLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin text-slate-600" />
+            <Loader2 className="w-4 h-4 animate-spin text-slate-600 dark:text-slate-400" />
           ) : (
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
@@ -315,4 +315,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

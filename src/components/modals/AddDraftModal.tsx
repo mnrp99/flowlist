@@ -9,12 +9,7 @@ import {
   X,
   Plus,
   Sparkles,
-  Calendar,
   AlertCircle,
-  Flag,
-  FileText,
-  MapPin,
-  ShoppingBag,
   CheckSquare,
 } from "lucide-react";
 
@@ -95,18 +90,18 @@ export const AddDraftModal: React.FC = () => {
       />
 
       {/* Modal Container */}
-      <div className="relative z-10 w-full max-w-[400px] bg-white rounded-3xl p-5 shadow-2xl border border-slate-100 flex flex-col space-y-3.5 max-h-[90vh] overflow-y-auto no-scrollbar animate-in zoom-in-95 duration-200">
+      <div className="relative z-10 w-full max-w-[400px] bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col space-y-3.5 max-h-[90vh] overflow-y-auto no-scrollbar animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
               {isTodo ? <CheckSquare className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
             </div>
             <div>
-              <h3 className="text-sm font-extrabold text-slate-900">
+              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
                 {isTodo ? "Tambah Kegiatan (To-Do)" : "Tambah Rencana (Draft)"}
               </h3>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 {isTodo
                   ? "Pengingat kegiatan murni (Tanpa Budget)"
                   : "Kunci dana di tabungan sebelum belanja"}
@@ -116,7 +111,7 @@ export const AddDraftModal: React.FC = () => {
           <button
             type="button"
             onClick={closeAddDraftModal}
-            className="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center"
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white flex items-center justify-center cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -125,10 +120,10 @@ export const AddDraftModal: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
           {/* 1. Category Switcher */}
           <div>
-            <label className="font-bold text-slate-800 mb-1.5 block">
+            <label className="font-bold text-slate-800 dark:text-slate-200 mb-1.5 block">
               Pilih Jenis Rencana
             </label>
-            <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-2xl">
+            <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-2xl">
               <button
                 type="button"
                 onClick={() => {
@@ -137,10 +132,10 @@ export const AddDraftModal: React.FC = () => {
                   setTag("TikTok Saved");
                   setMeta("2 Pax");
                 }}
-                className={`py-2 px-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1 ${
+                className={`py-2 px-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
                   category === "to-go"
-                    ? "bg-white text-emerald-800 shadow-sm"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-white dark:bg-slate-900 text-emerald-800 dark:text-emerald-400 shadow-sm"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
                 }`}
               >
                 <span>📍</span>
@@ -155,10 +150,10 @@ export const AddDraftModal: React.FC = () => {
                   setTag("Shopee Wishlist");
                   setMeta("Kebutuhan");
                 }}
-                className={`py-2 px-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1 ${
+                className={`py-2 px-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
                   category === "to-buy"
-                    ? "bg-white text-emerald-800 shadow-sm"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-white dark:bg-slate-900 text-emerald-800 dark:text-emerald-400 shadow-sm"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
                 }`}
               >
                 <span>🛍️</span>
@@ -173,10 +168,10 @@ export const AddDraftModal: React.FC = () => {
                   setTag("Activities");
                   setMeta("Aktivitas");
                 }}
-                className={`py-2 px-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1 ${
+                className={`py-2 px-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
                   category === "to-do"
-                    ? "bg-white text-emerald-800 shadow-sm"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-white dark:bg-slate-900 text-emerald-800 dark:text-emerald-400 shadow-sm"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
                 }`}
               >
                 <span>📅</span>
@@ -186,8 +181,8 @@ export const AddDraftModal: React.FC = () => {
 
             {/* To-Do info pill */}
             {isTodo && (
-              <div className="mt-2 p-2 rounded-xl bg-blue-50 border border-blue-200/60 text-blue-900 text-[11px] flex items-center gap-1.5 font-medium">
-                <AlertCircle className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+              <div className="mt-2 p-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 border border-blue-200/60 dark:border-blue-800/60 text-blue-900 dark:text-blue-200 text-[11px] flex items-center gap-1.5 font-medium">
+                <AlertCircle className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
                 <span>To-Do tidak memerlukan alokasi budget (Rp 0). Hanya pengingat kegiatan.</span>
               </div>
             )}
@@ -195,7 +190,7 @@ export const AddDraftModal: React.FC = () => {
 
           {/* 2. Judul Rencana / Kegiatan */}
           <div>
-            <label className="font-bold text-slate-800 mb-1 block">
+            <label className="font-bold text-slate-800 dark:text-slate-200 mb-1 block">
               {isTodo ? "Judul Kegiatan" : "Nama Tempat / Barang"}
             </label>
             <input
@@ -210,7 +205,7 @@ export const AddDraftModal: React.FC = () => {
                   ? "Contoh: Kacamata Minus Anti-Radiasi"
                   : "Contoh: Workshop Keramik Clay Studio"
               }
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
@@ -218,12 +213,12 @@ export const AddDraftModal: React.FC = () => {
           {!isTodo && (
             <>
               {/* Estimasi Biaya dengan Format Otomatis Thousand Separator */}
-              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-100 transition-all">
+              <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-2xl p-3 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-100 transition-all">
                 <div className="flex justify-between items-center mb-1">
-                  <label className="font-extrabold text-[11px] uppercase tracking-wider text-slate-600">
+                  <label className="font-extrabold text-[11px] uppercase tracking-wider text-slate-600 dark:text-slate-400">
                     Estimasi Biaya yang Dikunci
                   </label>
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/70 px-2 py-0.5 rounded-full">
                     Format Titik (50.000)
                   </span>
                 </div>
@@ -240,7 +235,7 @@ export const AddDraftModal: React.FC = () => {
               {/* Pax / Detail Toko */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="font-bold text-slate-800 mb-1 block">
+                  <label className="font-bold text-slate-800 dark:text-slate-200 mb-1 block">
                     {category === "to-go" ? "Jumlah Orang (Pax)" : "Kategori Kebutuhan"}
                   </label>
                   <input
@@ -248,11 +243,11 @@ export const AddDraftModal: React.FC = () => {
                     value={meta}
                     onChange={(e) => setMeta(e.target.value)}
                     placeholder={category === "to-go" ? "3 Pax" : "Kebutuhan Kerja"}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
                 <div>
-                  <label className="font-bold text-slate-800 mb-1 block">
+                  <label className="font-bold text-slate-800 dark:text-slate-200 mb-1 block">
                     Sumber Tag
                   </label>
                   <input
@@ -260,7 +255,7 @@ export const AddDraftModal: React.FC = () => {
                     value={tag}
                     onChange={(e) => setTag(e.target.value)}
                     placeholder="TikTok / Shopee / IG"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
               </div>
@@ -268,7 +263,7 @@ export const AddDraftModal: React.FC = () => {
               {/* Link Produk (Khusus To-Buy) */}
               {category === "to-buy" && (
                 <div>
-                  <label className="font-bold text-slate-800 mb-1 block">
+                  <label className="font-bold text-slate-800 dark:text-slate-200 mb-1 block">
                     Tautan Produk (Opsional)
                   </label>
                   <input
@@ -276,7 +271,7 @@ export const AddDraftModal: React.FC = () => {
                     value={productLink}
                     onChange={(e) => setProductLink(e.target.value)}
                     placeholder="https://shopee.co.id/..."
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
               )}
@@ -286,17 +281,17 @@ export const AddDraftModal: React.FC = () => {
           {/* 4. CONDITIONAL FIELDS: Prioritas Khusus To-Do */}
           {isTodo && (
             <div>
-              <label className="font-bold text-slate-800 mb-1.5 block">
+              <label className="font-bold text-slate-800 dark:text-slate-200 mb-1.5 block">
                 Tingkat Prioritas Kegiatan
               </label>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setPriority("high")}
-                  className={`py-2 px-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+                  className={`py-2 px-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
                     priority === "high"
-                      ? "bg-rose-50 border-rose-500 text-rose-700 shadow-xs"
-                      : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                      ? "bg-rose-50 dark:bg-rose-950/70 border-rose-500 text-rose-700 dark:text-rose-300 shadow-xs"
+                      : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
                   }`}
                 >
                   <span>🔴</span>
@@ -305,10 +300,10 @@ export const AddDraftModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setPriority("medium")}
-                  className={`py-2 px-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+                  className={`py-2 px-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
                     priority === "medium"
-                      ? "bg-amber-50 border-amber-500 text-amber-700 shadow-xs"
-                      : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                      ? "bg-amber-50 dark:bg-amber-950/70 border-amber-500 text-amber-700 dark:text-amber-300 shadow-xs"
+                      : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
                   }`}
                 >
                   <span>🟡</span>
@@ -317,10 +312,10 @@ export const AddDraftModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setPriority("low")}
-                  className={`py-2 px-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+                  className={`py-2 px-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
                     priority === "low"
-                      ? "bg-emerald-50 border-emerald-500 text-emerald-700 shadow-xs"
-                      : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                      ? "bg-emerald-50 dark:bg-emerald-950/70 border-emerald-500 text-emerald-700 dark:text-emerald-300 shadow-xs"
+                      : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
                   }`}
                 >
                   <span>🟢</span>
@@ -332,7 +327,7 @@ export const AddDraftModal: React.FC = () => {
 
           {/* 5. Pemilih Tanggal & Jam Interaktif (Visual DateTimePicker) */}
           <div>
-            <label className="font-bold text-slate-800 mb-1 block">
+            <label className="font-bold text-slate-800 dark:text-slate-200 mb-1 block">
               Jadwal Pelaksanaan (Kalender & Jam)
             </label>
             <DateTimePicker
@@ -344,7 +339,7 @@ export const AddDraftModal: React.FC = () => {
 
           {/* 6. Catatan (Notes) */}
           <div>
-            <label className="font-bold text-slate-800 mb-1 block">
+            <label className="font-bold text-slate-800 dark:text-slate-200 mb-1 block">
               Catatan / Pengingat (Opsional)
             </label>
             <textarea
@@ -352,14 +347,14 @@ export const AddDraftModal: React.FC = () => {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Catatan tambahan, dresscode, reservasi, dll..."
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-none"
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-none"
             />
           </div>
 
           {/* Submit */}
           <button
             type="submit"
-            className="w-full mt-2 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold rounded-2xl shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5 transition-all text-sm"
+            className="w-full mt-2 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold rounded-2xl shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5 transition-all text-sm cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>

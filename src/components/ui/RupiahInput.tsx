@@ -82,13 +82,13 @@ export const RupiahInput: React.FC<RupiahInputProps> = ({
   const getInputClass = () => {
     switch (size) {
       case "hero":
-        return "w-full text-3xl font-extrabold text-slate-900 tracking-tight bg-transparent focus:outline-none tabular-nums placeholder:text-slate-300";
+        return "w-full text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight bg-transparent focus:outline-none tabular-nums placeholder:text-slate-300 dark:placeholder:text-slate-600";
       case "lg":
-        return "w-full text-xl font-bold text-slate-900 tracking-tight bg-transparent focus:outline-none tabular-nums placeholder:text-slate-300";
+        return "w-full text-xl font-bold text-slate-900 dark:text-white tracking-tight bg-transparent focus:outline-none tabular-nums placeholder:text-slate-300 dark:placeholder:text-slate-600";
       case "sm":
-        return "w-full text-xs font-semibold text-slate-900 bg-transparent focus:outline-none tabular-nums placeholder:text-slate-300";
+        return "w-full text-xs font-semibold text-slate-900 dark:text-white bg-transparent focus:outline-none tabular-nums placeholder:text-slate-300 dark:placeholder:text-slate-600";
       default:
-        return "w-full text-base font-bold text-slate-900 bg-transparent focus:outline-none tabular-nums placeholder:text-slate-300";
+        return "w-full text-base font-bold text-slate-900 dark:text-white bg-transparent focus:outline-none tabular-nums placeholder:text-slate-300 dark:placeholder:text-slate-600";
     }
   };
 
