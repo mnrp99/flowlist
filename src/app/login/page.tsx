@@ -91,9 +91,14 @@ export default function LoginPage() {
         }
       }
     } catch (err: unknown) {
-      setErrorMessage(
-        err instanceof Error ? err.message : "Terjadi kesalahan sistem. Silakan coba lagi."
-      );
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.toLowerCase().includes("failed to fetch") || msg.toLowerCase().includes("fetch")) {
+        setErrorMessage(
+          "Gagal terhubung ke server Supabase (Failed to fetch). Project Supabase Anda kemungkinan sedang di-pause otomatis karena sudah lebih dari 7 hari tidak aktif. Silakan buka Supabase Dashboard dan klik 'Restore Project'."
+        );
+      } else {
+        setErrorMessage(msg || "Terjadi kesalahan sistem. Silakan coba lagi.");
+      }
     } finally {
       setLoading(false);
     }
